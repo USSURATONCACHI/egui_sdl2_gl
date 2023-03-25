@@ -165,7 +165,6 @@ pub fn input_to_egui(
                 state.input.screen_rect = Some(painter.screen_rect);
             }
             _ => {
-                println!("{:?}", win_event);
             },
         },
 
@@ -216,7 +215,6 @@ pub fn input_to_egui(
         KeyUp {
             keycode, keymod, ..
         } => {
-            println!("Keyup keymod {:?} {:?}", keymod, keycode);
             if (keymod & Mod::LALTMOD == Mod::LALTMOD) || (keymod & Mod::RALTMOD == Mod::RALTMOD) || 
                 matches!(keycode, Some(Keycode::LAlt)) || matches!(keycode, Some(Keycode::RAlt)) {
                 state.modifiers.alt = false;
@@ -322,7 +320,6 @@ pub fn input_to_egui(
         }
 
         _ => {
-            println!("{:?}", event);
             //dbg!(event);
         }
     }
