@@ -164,7 +164,9 @@ pub fn input_to_egui(
                 painter.update_screen_rect(window.drawable_size());
                 state.input.screen_rect = Some(painter.screen_rect);
             }
-            _ => (),
+            _ => {
+                println!("{:?}", win_event);
+            },
         },
 
         //MouseButonLeft pressed is the only one needed by egui
@@ -214,6 +216,27 @@ pub fn input_to_egui(
         KeyUp {
             keycode, keymod, ..
         } => {
+            println!("Keyup keymod {:?} {:?}", keymod, keycode);
+            if (keymod & Mod::LALTMOD == Mod::LALTMOD) || (keymod & Mod::RALTMOD == Mod::RALTMOD) || 
+                matches!(keycode, Some(Keycode::LAlt)) || matches!(keycode, Some(Keycode::RAlt)) {
+                state.modifiers.alt = false;
+            }
+            if (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD) || (keymod & Mod::RCTRLMOD == Mod::RCTRLMOD) || 
+                matches!(keycode, Some(Keycode::LCtrl)) || matches!(keycode, Some(Keycode::RCtrl)) {
+                state.modifiers.ctrl = false;
+            }
+            if (keymod & Mod::LSHIFTMOD == Mod::LSHIFTMOD) || (keymod & Mod::RSHIFTMOD == Mod::RSHIFTMOD) || 
+                matches!(keycode, Some(Keycode::LShift)) || matches!(keycode, Some(Keycode::RShift)) {
+                state.modifiers.shift = false;
+            }
+            if keymod & Mod::LGUIMOD == Mod::LGUIMOD ||  matches!(keycode, Some(Keycode::LGui)) {
+                state.modifiers.mac_cmd = false;
+            }
+            if (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD) || (keymod & Mod::LGUIMOD == Mod::LGUIMOD) || 
+                matches!(keycode, Some(Keycode::LCtrl)) || matches!(keycode, Some(Keycode::LGui)) {
+                state.modifiers.command = false;
+            }
+
             let key_code = match keycode {
                 Some(key_code) => key_code,
                 _ => return,
@@ -221,19 +244,6 @@ pub fn input_to_egui(
             let key = match translate_virtual_key_code(key_code) {
                 Some(key) => key,
                 _ => return,
-            };
-            state.modifiers = Modifiers {
-                alt: (keymod & Mod::LALTMOD == Mod::LALTMOD)
-                    || (keymod & Mod::RALTMOD == Mod::RALTMOD),
-                ctrl: (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD)
-                    || (keymod & Mod::RCTRLMOD == Mod::RCTRLMOD),
-                shift: (keymod & Mod::LSHIFTMOD == Mod::LSHIFTMOD)
-                    || (keymod & Mod::RSHIFTMOD == Mod::RSHIFTMOD),
-                mac_cmd: keymod & Mod::LGUIMOD == Mod::LGUIMOD,
-
-                //TOD: Test on both windows and mac
-                command: (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD)
-                    || (keymod & Mod::LGUIMOD == Mod::LGUIMOD),
             };
 
             state.input.events.push(Event::Key {
@@ -246,6 +256,22 @@ pub fn input_to_egui(
         KeyDown {
             keycode, keymod, ..
         } => {
+            if (keymod & Mod::LALTMOD == Mod::LALTMOD) || (keymod & Mod::RALTMOD == Mod::RALTMOD) {
+                state.modifiers.alt = true;
+            }
+            if (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD) || (keymod & Mod::RCTRLMOD == Mod::RCTRLMOD) {
+                state.modifiers.ctrl = true;
+            }
+            if (keymod & Mod::LSHIFTMOD == Mod::LSHIFTMOD) || (keymod & Mod::RSHIFTMOD == Mod::RSHIFTMOD) {
+                state.modifiers.shift = true;
+            }
+            if keymod & Mod::LGUIMOD == Mod::LGUIMOD {
+                state.modifiers.mac_cmd = true;
+            }
+            if (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD) || (keymod & Mod::LGUIMOD == Mod::LGUIMOD) {
+                state.modifiers.command = true;
+            }
+
             let key_code = match keycode {
                 Some(key_code) => key_code,
                 _ => return,
@@ -254,19 +280,6 @@ pub fn input_to_egui(
             let key = match translate_virtual_key_code(key_code) {
                 Some(key) => key,
                 _ => return,
-            };
-            state.modifiers = Modifiers {
-                alt: (keymod & Mod::LALTMOD == Mod::LALTMOD)
-                    || (keymod & Mod::RALTMOD == Mod::RALTMOD),
-                ctrl: (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD)
-                    || (keymod & Mod::RCTRLMOD == Mod::RCTRLMOD),
-                shift: (keymod & Mod::LSHIFTMOD == Mod::LSHIFTMOD)
-                    || (keymod & Mod::RSHIFTMOD == Mod::RSHIFTMOD),
-                mac_cmd: keymod & Mod::LGUIMOD == Mod::LGUIMOD,
-
-                //TOD: Test on both windows and mac
-                command: (keymod & Mod::LCTRLMOD == Mod::LCTRLMOD)
-                    || (keymod & Mod::LGUIMOD == Mod::LGUIMOD),
             };
 
             state.input.events.push(Event::Key {
@@ -309,6 +322,7 @@ pub fn input_to_egui(
         }
 
         _ => {
+            println!("{:?}", event);
             //dbg!(event);
         }
     }
